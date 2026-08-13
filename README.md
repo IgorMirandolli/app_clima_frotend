@@ -15,6 +15,10 @@ App de clima feita com HTML, CSS e JavaScript puro. A interface usa dados reais 
 3. A Forecast API consulta o clima das coordenadas encontradas.
 4. O JavaScript mostra temperatura, umidade, condicao atual e previsao de 5 dias.
 
+Ao abrir a pagina, o navegador solicita permissao para usar a localizacao atual. As coordenadas sao usadas somente para consultar o clima e identificar a cidade; elas nao sao armazenadas pela aplicacao. Se a permissao for negada, a busca manual continua disponivel.
+
+A busca tambem oferece sugestoes de cidades enquanto o usuario digita. E possivel escolher uma sugestao com mouse, toque ou pelas teclas de seta e Enter.
+
 ## Como usar
 
 1. Instale as dependencias com `npm install`.
@@ -30,3 +34,4 @@ E necessario estar conectado a internet para consultar os dados.
 
 - Geocoding API: `https://geocoding-api.open-meteo.com/v1/search`
 - Forecast API: `https://api.open-meteo.com/v1/forecast`
+- Reverse Geocoding API: `https://api.bigdatacloud.net/data/reverse-geocode-client`

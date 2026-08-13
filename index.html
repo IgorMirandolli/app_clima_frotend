@@ -27,17 +27,32 @@
 
       <div class="search-area">
         <form class="search-panel" id="weather-form">
-          <label class="sr-only" for="city-input">Cidade</label>
-          <input
-            id="city-input"
-            name="city"
-            type="search"
-            placeholder="Digite uma cidade, ex: Sao Paulo"
-            autocomplete="off"
-            minlength="2"
-            required
-            aria-describedby="search-status"
-          >
+          <div class="search-field">
+            <label class="sr-only" for="city-input">Cidade</label>
+            <input
+              id="city-input"
+              name="city"
+              type="search"
+              role="combobox"
+              placeholder="Digite uma cidade, ex: Sao Paulo"
+              autocomplete="off"
+              enterkeyhint="search"
+              minlength="2"
+              required
+              aria-autocomplete="list"
+              aria-controls="city-suggestions"
+              aria-describedby="search-status"
+              aria-expanded="false"
+              aria-haspopup="listbox"
+            >
+            <ul
+              class="city-suggestions"
+              id="city-suggestions"
+              role="listbox"
+              aria-label="Sugestoes de cidades"
+              hidden
+            ></ul>
+          </div>
           <button id="search-button" type="submit">
             <span>Buscar clima</span>
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -95,7 +110,18 @@
           <p class="section-note"><span></span> Dados atualizados pela Open-Meteo</p>
         </div>
 
-        <div class="forecast-list" id="forecast-list" aria-live="polite"></div>
+        <p class="forecast-swipe-hint" aria-hidden="true">
+          Deslize para ver os proximos dias
+          <svg viewBox="0 0 24 24">
+            <path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+        </p>
+        <div
+          class="forecast-list"
+          id="forecast-list"
+          aria-label="Previsao do tempo para os proximos cinco dias"
+          aria-live="polite"
+        ></div>
       </section>
     </main>
   </div>

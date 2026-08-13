@@ -2,6 +2,7 @@ const weatherForm = document.getElementById('weather-form');
 const cityInput = document.getElementById('city-input');
 const searchButton = document.getElementById('search-button');
 const searchButtonLabel = searchButton.querySelector('span');
+const citySuggestions = document.getElementById('city-suggestions');
 
 const ui = {
   locationName: document.getElementById('location-name'),
@@ -11,11 +12,13 @@ const ui = {
   currentWeatherIcon: document.getElementById('current-weather-icon'),
   forecastList: document.getElementById('forecast-list'),
   searchStatus: document.getElementById('search-status'),
+  citySuggestions,
 };
 
 const API_URLS = {
   geocoding: 'https://geocoding-api.open-meteo.com/v1/search',
   forecast: 'https://api.open-meteo.com/v1/forecast',
+  reverseGeocoding: 'https://api.bigdatacloud.net/data/reverse-geocode-client',
 };
 
 const weatherDescriptions = {
@@ -50,6 +53,13 @@ const weatherDescriptions = {
 };
 
 let activeRequest;
+let suggestionRequest;
+let suggestionTimer;
+let suggestions = [];
+let activeSuggestionIndex = -1;
+let selectedLocation;
+let manualSearchStarted = false;
+let preferredCountryCode = navigator.language.split('-')[1]?.toUpperCase();
 
 function getWeatherDescription(code) {
   return weatherDescriptions[code] ?? 'Condicao indisponivel';
@@ -108,6 +118,129 @@ function formatWeekday(date) {
   return weekday.replace('.', '');
 }
 
+function normalizeSearchText(value) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase('pt-BR');
+}
+
+function getUniqueLocationParts(parts) {
+  return parts
+    .filter(Boolean)
+    .filter((item, index, items) => items.indexOf(item) === index);
+}
+
+function formatLocationLabel(location) {
+  return getUniqueLocationParts([
+    location.name,
+    location.admin1,
+    location.country,
+  ]).join(', ');
+}
+
+function sortLocationSuggestions(locations) {
+  const uniqueLocations = locations.filter((location, index, items) => {
+    const locationKey = [location.name, location.admin1, location.country].join('|');
+    return items.findIndex((item) => (
+      [item.name, item.admin1, item.country].join('|') === locationKey
+    )) === index;
+  });
+
+  return uniqueLocations.sort((first, second) => {
+    const firstIsPreferred = first.country_code === preferredCountryCode;
+    const secondIsPreferred = second.country_code === preferredCountryCode;
+
+    if (firstIsPreferred !== secondIsPreferred) {
+      return Number(secondIsPreferred) - Number(firstIsPreferred);
+    }
+
+    return (second.population ?? 0) - (first.population ?? 0);
+  });
+}
+
+function setSuggestionsVisibility(isVisible) {
+  ui.citySuggestions.hidden = !isVisible;
+  cityInput.setAttribute('aria-expanded', String(isVisible));
+
+  if (!isVisible) {
+    cityInput.removeAttribute('aria-activedescendant');
+    activeSuggestionIndex = -1;
+  }
+}
+
+function closeSuggestions(clearItems = false) {
+  setSuggestionsVisibility(false);
+
+  if (clearItems) {
+    suggestions = [];
+    ui.citySuggestions.replaceChildren();
+  }
+}
+
+function renderSuggestionMessage(message) {
+  suggestions = [];
+  const item = document.createElement('li');
+  item.className = 'city-suggestions__message';
+  item.textContent = message;
+  ui.citySuggestions.replaceChildren(item);
+  setSuggestionsVisibility(true);
+}
+
+function renderSuggestions(locations, query) {
+  suggestions = locations;
+  activeSuggestionIndex = -1;
+  ui.citySuggestions.replaceChildren();
+
+  if (!locations.length) {
+    renderSuggestionMessage(`Nenhuma cidade comecando com "${query}".`);
+    return;
+  }
+
+  locations.forEach((location, index) => {
+    const item = document.createElement('li');
+    const button = document.createElement('button');
+    const name = document.createElement('strong');
+    const details = document.createElement('span');
+
+    button.type = 'button';
+    button.id = `city-suggestion-${index}`;
+    button.className = 'city-suggestion';
+    button.dataset.index = String(index);
+    button.setAttribute('role', 'option');
+    button.setAttribute('aria-selected', 'false');
+    name.textContent = location.name;
+    details.textContent = getUniqueLocationParts([
+      location.admin1,
+      location.country,
+    ]).join(' - ');
+
+    button.append(name, details);
+    item.append(button);
+    ui.citySuggestions.append(item);
+  });
+
+  setSuggestionsVisibility(true);
+}
+
+function setActiveSuggestion(index) {
+  const buttons = [...ui.citySuggestions.querySelectorAll('.city-suggestion')];
+
+  if (!buttons.length) return;
+
+  activeSuggestionIndex = (index + buttons.length) % buttons.length;
+  buttons.forEach((button, buttonIndex) => {
+    button.setAttribute(
+      'aria-selected',
+      String(buttonIndex === activeSuggestionIndex),
+    );
+  });
+
+  const activeButton = buttons[activeSuggestionIndex];
+  cityInput.setAttribute('aria-activedescendant', activeButton.id);
+  activeButton.scrollIntoView({ block: 'nearest' });
+}
+
 function renderWeather(data) {
   ui.locationName.textContent = data.city;
   ui.weatherDescription.textContent = data.description;
@@ -155,20 +288,44 @@ async function fetchJson(url, signal) {
   return response.json();
 }
 
-async function findLocation(city, signal) {
+async function findLocations(city, count, signal) {
   const params = new URLSearchParams({
     name: city,
-    count: '1',
+    count: String(count),
     language: 'pt',
     format: 'json',
   });
   const data = await fetchJson(`${API_URLS.geocoding}?${params}`, signal);
 
-  if (!data.results?.length) {
+  return data.results ?? [];
+}
+
+async function findLocation(city, signal) {
+  const locations = await findLocations(city, 1, signal);
+
+  if (!locations.length) {
     throw new Error('Cidade nao encontrada. Confira o nome e tente novamente.');
   }
 
-  return data.results[0];
+  return locations[0];
+}
+
+async function findLocationByCoordinates(latitude, longitude, signal) {
+  const params = new URLSearchParams({
+    latitude: String(latitude),
+    longitude: String(longitude),
+    localityLanguage: 'pt',
+  });
+  const data = await fetchJson(`${API_URLS.reverseGeocoding}?${params}`, signal);
+
+  return {
+    name: data.city || data.locality || 'Sua localizacao',
+    admin1: data.principalSubdivision,
+    country: data.countryName,
+    country_code: data.countryCode,
+    latitude,
+    longitude,
+  };
 }
 
 async function findWeather(latitude, longitude, signal) {
@@ -185,13 +342,8 @@ async function findWeather(latitude, longitude, signal) {
 }
 
 function normalizeWeather(location, weather) {
-  const locationLabel = [location.name, location.admin1, location.country]
-    .filter(Boolean)
-    .filter((item, index, items) => items.indexOf(item) === index)
-    .join(', ');
-
   return {
-    city: locationLabel,
+    city: formatLocationLabel(location),
     description: getWeatherDescription(weather.current.weather_code),
     temperature: Math.round(weather.current.temperature_2m),
     humidity: Math.round(weather.current.relative_humidity_2m),
@@ -204,6 +356,66 @@ function normalizeWeather(location, weather) {
       weatherCode: weather.daily.weather_code[index],
     })),
   };
+}
+
+function getRequestErrorMessage(error) {
+  return error instanceof TypeError
+    ? 'Nao foi possivel conectar. Verifique sua internet e tente novamente.'
+    : error.message;
+}
+
+async function loadLocationSuggestions(query) {
+  suggestionRequest?.abort();
+  const request = new AbortController();
+  suggestionRequest = request;
+  renderSuggestionMessage('Buscando cidades...');
+
+  try {
+    const locations = await findLocations(query, 100, request.signal);
+    const normalizedQuery = normalizeSearchText(query);
+    const prefixMatches = sortLocationSuggestions(locations
+      .filter((location) => (
+        normalizeSearchText(location.name).startsWith(normalizedQuery)
+      )))
+      .slice(0, 6);
+
+    if (suggestionRequest === request) {
+      renderSuggestions(prefixMatches, query);
+    }
+  } catch (error) {
+    if (error.name !== 'AbortError' && suggestionRequest === request) {
+      renderSuggestionMessage('Nao foi possivel carregar as sugestoes.');
+    }
+  }
+}
+
+async function searchWeatherAtLocation(location, successMessage = 'Clima atualizado com sucesso.') {
+  activeRequest?.abort();
+  const request = new AbortController();
+  activeRequest = request;
+  setLoading(true);
+  setStatus(`Buscando o clima de ${location.name}...`);
+
+  try {
+    const weather = await findWeather(
+      location.latitude,
+      location.longitude,
+      request.signal,
+    );
+
+    renderWeather(normalizeWeather(location, weather));
+    setStatus(successMessage);
+    return true;
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      setStatus(getRequestErrorMessage(error), true);
+    }
+    return false;
+  } finally {
+    if (activeRequest === request) {
+      setLoading(false);
+    }
+  }
 }
 
 async function searchWeather(city) {
@@ -223,19 +435,175 @@ async function searchWeather(city) {
 
     renderWeather(normalizeWeather(location, weather));
     setStatus('Clima atualizado com sucesso.');
+    return true;
   } catch (error) {
     if (error.name !== 'AbortError') {
-      const message = error instanceof TypeError
-        ? 'Nao foi possivel conectar. Verifique sua internet e tente novamente.'
-        : error.message;
-      setStatus(message, true);
+      setStatus(getRequestErrorMessage(error), true);
     }
+    return false;
   } finally {
     if (activeRequest === request) {
       setLoading(false);
     }
   }
 }
+
+async function searchWeatherFromCoordinates(latitude, longitude) {
+  activeRequest?.abort();
+  const request = new AbortController();
+  activeRequest = request;
+  setLoading(true);
+  setStatus('Localizacao encontrada. Buscando o clima...');
+
+  try {
+    const locationRequest = findLocationByCoordinates(
+      latitude,
+      longitude,
+      request.signal,
+    ).catch(() => ({
+      name: 'Sua localizacao',
+      latitude,
+      longitude,
+    }));
+    const weatherRequest = findWeather(latitude, longitude, request.signal);
+    const [location, weather] = await Promise.all([
+      locationRequest,
+      weatherRequest,
+    ]);
+
+    preferredCountryCode = location.country_code || preferredCountryCode;
+    renderWeather(normalizeWeather(location, weather));
+    setStatus('Clima da sua localizacao atualizado.');
+    return true;
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      setStatus(getRequestErrorMessage(error), true);
+    }
+    return false;
+  } finally {
+    if (activeRequest === request) {
+      setLoading(false);
+    }
+  }
+}
+
+function getCurrentPosition() {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: false,
+      maximumAge: 10 * 60 * 1000,
+      timeout: 10000,
+    });
+  });
+}
+
+async function loadInitialWeather() {
+  if (!('geolocation' in navigator)) {
+    await searchWeather('Rio de Janeiro');
+    setStatus('Geolocalizacao indisponivel. Pesquise sua cidade.', true);
+    return;
+  }
+
+  setStatus('Permita o acesso a localizacao para mostrar o clima da sua cidade.');
+
+  try {
+    const position = await getCurrentPosition();
+
+    if (manualSearchStarted) return;
+
+    await searchWeatherFromCoordinates(
+      position.coords.latitude,
+      position.coords.longitude,
+    );
+  } catch (error) {
+    if (manualSearchStarted) return;
+
+    await searchWeather('Rio de Janeiro');
+
+    const message = error.code === 1
+      ? 'Localizacao nao autorizada. Pesquise sua cidade.'
+      : 'Nao foi possivel detectar sua localizacao. Pesquise sua cidade.';
+    setStatus(message, true);
+  }
+}
+
+async function selectSuggestion(index) {
+  const location = suggestions[index];
+
+  if (!location) return;
+
+  manualSearchStarted = true;
+  selectedLocation = location;
+  preferredCountryCode = location.country_code || preferredCountryCode;
+  cityInput.value = formatLocationLabel(location);
+  suggestionRequest?.abort();
+  closeSuggestions(true);
+  await searchWeatherAtLocation(location);
+}
+
+cityInput.addEventListener('input', () => {
+  manualSearchStarted = true;
+  selectedLocation = undefined;
+  clearTimeout(suggestionTimer);
+
+  const query = cityInput.value.trim();
+
+  if (query.length < 2) {
+    suggestionRequest?.abort();
+    closeSuggestions(true);
+    return;
+  }
+
+  suggestionTimer = setTimeout(() => {
+    loadLocationSuggestions(query);
+  }, 280);
+});
+
+cityInput.addEventListener('keydown', (event) => {
+  if (ui.citySuggestions.hidden) return;
+
+  if (event.key === 'ArrowDown') {
+    event.preventDefault();
+    setActiveSuggestion(activeSuggestionIndex + 1);
+  }
+
+  if (event.key === 'ArrowUp') {
+    event.preventDefault();
+    const previousIndex = activeSuggestionIndex < 0
+      ? suggestions.length - 1
+      : activeSuggestionIndex - 1;
+    setActiveSuggestion(previousIndex);
+  }
+
+  if (event.key === 'Enter' && activeSuggestionIndex >= 0) {
+    event.preventDefault();
+    selectSuggestion(activeSuggestionIndex);
+  }
+
+  if (event.key === 'Escape') {
+    closeSuggestions();
+  }
+});
+
+cityInput.addEventListener('focus', () => {
+  if (suggestions.length && cityInput.value.trim().length >= 2) {
+    setSuggestionsVisibility(true);
+  }
+});
+
+ui.citySuggestions.addEventListener('click', (event) => {
+  const button = event.target.closest('.city-suggestion');
+
+  if (button) {
+    selectSuggestion(Number(button.dataset.index));
+  }
+});
+
+document.addEventListener('pointerdown', (event) => {
+  if (!weatherForm.contains(event.target)) {
+    closeSuggestions();
+  }
+});
 
 weatherForm.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -246,7 +614,18 @@ weatherForm.addEventListener('submit', async (event) => {
     return;
   }
 
+  manualSearchStarted = true;
+  closeSuggestions(true);
+
+  if (
+    selectedLocation
+    && city === formatLocationLabel(selectedLocation)
+  ) {
+    await searchWeatherAtLocation(selectedLocation);
+    return;
+  }
+
   await searchWeather(city);
 });
 
-searchWeather('Rio de Janeiro');
+loadInitialWeather();
