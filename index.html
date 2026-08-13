@@ -17,15 +17,27 @@
         <p class="eyebrow">Portifolio Frontend</p>
         <h1>Clima Agora</h1>
         <p class="hero__text">
-          Uma base limpa para consultar temperatura, umidade, condicao do tempo e previsao.
+          Um MVP simples para consultar temperatura, umidade, condicao do tempo e previsao de 5 dias.
         </p>
       </div>
 
-      <form class="search-panel" id="weather-form">
-        <label class="sr-only" for="city-input">Cidade</label>
-        <input id="city-input" name="city" type="text" placeholder="Digite uma cidade, ex: Sao Paulo" autocomplete="off">
-        <button type="submit">Buscar clima</button>
-      </form>
+      <div class="search-area">
+        <form class="search-panel" id="weather-form">
+          <label class="sr-only" for="city-input">Cidade</label>
+          <input
+            id="city-input"
+            name="city"
+            type="search"
+            placeholder="Digite uma cidade, ex: Sao Paulo"
+            autocomplete="off"
+            minlength="2"
+            required
+            aria-describedby="search-status"
+          >
+          <button id="search-button" type="submit">Buscar clima</button>
+        </form>
+        <p class="search-status" id="search-status" role="status" aria-live="polite"></p>
+      </div>
     </header>
 
     <main class="dashboard">
@@ -33,26 +45,18 @@
         <div>
           <p class="section-label">Clima atual</p>
           <h2 id="location-name">Rio de Janeiro</h2>
-          <p id="weather-description" class="weather-description">Parcialmente nublado</p>
+          <p id="weather-description" class="weather-description">Carregando dados reais...</p>
         </div>
 
         <div class="temperature-block">
-          <span id="temperature-value">27</span>
+          <span id="temperature-value">--</span>
           <small>&deg;C</small>
         </div>
 
         <div class="current-meta">
           <article class="mini-card">
             <span>Umidade</span>
-            <strong id="humidity-value">68%</strong>
-          </article>
-          <article class="mini-card">
-            <span>Sensacao</span>
-            <strong id="feels-like-value">29&deg;C</strong>
-          </article>
-          <article class="mini-card">
-            <span>Vento</span>
-            <strong id="wind-value">14 km/h</strong>
+            <strong id="humidity-value">--%</strong>
           </article>
         </div>
       </section>
@@ -63,50 +67,10 @@
             <p class="section-label">Previsao</p>
             <h2>Proximos dias</h2>
           </div>
-          <p class="section-note">Espaco pronto para ligar a API depois.</p>
+          <p class="section-note">Dados atualizados pela API Open-Meteo.</p>
         </div>
 
-        <div class="forecast-list" id="forecast-list">
-          <article class="forecast-item">
-            <span>Seg</span>
-            <strong>28&deg; / 22&deg;</strong>
-            <p>Sol entre nuvens</p>
-          </article>
-          <article class="forecast-item">
-            <span>Ter</span>
-            <strong>26&deg; / 21&deg;</strong>
-            <p>Chance de chuva</p>
-          </article>
-          <article class="forecast-item">
-            <span>Qua</span>
-            <strong>25&deg; / 20&deg;</strong>
-            <p>Nublado</p>
-          </article>
-          <article class="forecast-item">
-            <span>Qui</span>
-            <strong>29&deg; / 23&deg;</strong>
-            <p>Tempo aberto</p>
-          </article>
-          <article class="forecast-item">
-            <span>Sex</span>
-            <strong>30&deg; / 24&deg;</strong>
-            <p>Quente e seco</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="info-grid">
-        <article class="info-card card">
-          <p class="section-label">O que vem depois</p>
-          <h3>Conectar uma API</h3>
-          <p>Buscar a cidade, pegar latitude e longitude e montar os cards dinamicamente.</p>
-        </article>
-
-        <article class="info-card card">
-          <p class="section-label">Objetivo</p>
-          <h3>Projeto de portifolio</h3>
-          <p>Visual bonito, codigo simples e estrutura facil de evoluir para uma versao completa.</p>
-        </article>
+        <div class="forecast-list" id="forecast-list" aria-live="polite"></div>
       </section>
     </main>
   </div>
