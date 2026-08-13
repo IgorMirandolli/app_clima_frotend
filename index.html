@@ -7,17 +7,21 @@
   <title>Clima Agora</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="page-shell">
-    <header class="hero">
+    <header class="hero entrance entrance--first">
       <div class="hero__copy">
-        <p class="eyebrow">Portifolio Frontend</p>
-        <h1>Clima Agora</h1>
+        <a class="brand" href="#" aria-label="Clima Agora - inicio">
+          <span class="brand__mark" aria-hidden="true"></span>
+          <span>Clima Agora</span>
+        </a>
+        <p class="eyebrow">Previsao em tempo real</p>
+        <h1>O ceu da sua cidade, <span>sem misterio.</span></h1>
         <p class="hero__text">
-          Um MVP simples para consultar temperatura, umidade, condicao do tempo e previsao de 5 dias.
+          Temperatura, umidade e os proximos cinco dias em uma leitura simples e direta.
         </p>
       </div>
 
@@ -34,40 +38,61 @@
             required
             aria-describedby="search-status"
           >
-          <button id="search-button" type="submit">Buscar clima</button>
+          <button id="search-button" type="submit">
+            <span>Buscar clima</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+            </svg>
+          </button>
         </form>
         <p class="search-status" id="search-status" role="status" aria-live="polite"></p>
       </div>
     </header>
 
     <main class="dashboard">
-      <section class="current-weather card">
-        <div>
+      <section class="current-weather card entrance entrance--second">
+        <div class="current-weather__details">
           <p class="section-label">Clima atual</p>
           <h2 id="location-name">Rio de Janeiro</h2>
           <p id="weather-description" class="weather-description">Carregando dados reais...</p>
-        </div>
 
-        <div class="temperature-block">
-          <span id="temperature-value">--</span>
-          <small>&deg;C</small>
-        </div>
+          <div class="temperature-block">
+            <span id="temperature-value">--</span>
+            <small>&deg;C</small>
+          </div>
 
-        <div class="current-meta">
-          <article class="mini-card">
-            <span>Umidade</span>
-            <strong id="humidity-value">--%</strong>
+          <article class="humidity-card">
+            <span class="humidity-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 3.3S6.8 9 6.8 14a5.2 5.2 0 0 0 10.4 0C17.2 9 12 3.3 12 3.3Z" fill="none" stroke="currentColor" stroke-width="1.8"></path>
+              </svg>
+            </span>
+            <span>
+              <small>Umidade do ar</small>
+              <strong id="humidity-value">--%</strong>
+            </span>
           </article>
+        </div>
+
+        <div class="current-weather__visual" aria-hidden="true">
+          <span class="visual-orbit"></span>
+          <div class="weather-icon weather-icon--current" id="current-weather-icon">
+            <svg viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="12" fill="currentColor"></circle>
+              <path d="M32 7v8M32 49v8M7 32h8M49 32h8M14.3 14.3l5.7 5.7M44 44l5.7 5.7M49.7 14.3 44 20M20 44l-5.7 5.7" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="3"></path>
+            </svg>
+          </div>
+          <span class="visual-caption">Agora</span>
         </div>
       </section>
 
-      <section class="forecast card">
+      <section class="forecast entrance entrance--third">
         <div class="section-head">
           <div>
             <p class="section-label">Previsao</p>
             <h2>Proximos dias</h2>
           </div>
-          <p class="section-note">Dados atualizados pela API Open-Meteo.</p>
+          <p class="section-note"><span></span> Dados atualizados pela Open-Meteo</p>
         </div>
 
         <div class="forecast-list" id="forecast-list" aria-live="polite"></div>
@@ -75,6 +100,6 @@
     </main>
   </div>
 
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

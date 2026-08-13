@@ -17,8 +17,12 @@ App de clima feita com HTML, CSS e JavaScript puro. A interface usa dados reais 
 
 ## Como usar
 
-1. Abra `index.html` no navegador ou use a extensao Live Server do VS Code.
-2. Digite o nome de uma cidade e selecione `Buscar clima`.
+1. Instale as dependencias com `npm install`.
+2. Inicie o servidor local com `npm run dev`.
+3. Abra no navegador o endereco exibido no terminal, normalmente `http://localhost:5173`.
+4. Digite o nome de uma cidade e selecione `Buscar clima`.
+
+Para gerar a versao de producao, use `npm run build`. Os arquivos finais serao criados na pasta `dist`.
 
 E necessario estar conectado a internet para consultar os dados.
 
