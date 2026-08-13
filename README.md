@@ -12,11 +12,17 @@ Aplicacao web de previsao do tempo desenvolvida para portfolio com HTML, CSS e J
 - Repositorio: [github.com/IgorMirandolli/app_clima_frotend](https://github.com/IgorMirandolli/app_clima_frotend)
 - Deploy: ainda nao publicado.
 
-Depois da publicacao, substitua a linha acima pelo link da aplicacao online. Para incluir uma captura no README, salve a imagem como `docs/preview.png` e adicione:
+### Busca de cidades
 
-```md
-![Preview do Clima Agora](./docs/preview.png)
-```
+![Tela inicial e busca de cidades do Clima Agora](./docs/imagens/appclima1.png)
+
+### Clima atual
+
+![Card com temperatura e detalhes do clima atual](./docs/imagens/appclima2.png)
+
+### Previsao de cinco dias
+
+![Cards com a previsao do tempo para os proximos cinco dias](./docs/imagens/appclima3.png)
 
 ## Funcionalidades
 
@@ -81,6 +87,8 @@ O navegador pode solicitar permissao para acessar a localizacao. Caso ela seja n
 ```text
 app_clima_frotend/
 |-- app.js          # Eventos e fluxo principal
+|-- docs/
+|   `-- imagens/    # Capturas usadas no README
 |-- index.html      # Estrutura da pagina
 |-- style.css       # Design e responsividade
 |-- js/
