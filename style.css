@@ -326,6 +326,8 @@ input {
   grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
   min-height: 390px;
   padding: clamp(30px, 5vw, 54px);
+  column-gap: 32px;
+  row-gap: 34px;
   overflow: hidden;
   border-radius: 38px;
   color: var(--ink);
@@ -358,7 +360,8 @@ input {
 }
 
 .current-weather__details,
-.current-weather__visual {
+.current-weather__visual,
+.weather-stats {
   position: relative;
   z-index: 1;
 }
@@ -404,21 +407,29 @@ input {
   font-weight: 700;
 }
 
-.humidity-card {
-  display: inline-flex;
-  gap: 13px;
+.weather-stats {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.weather-stat {
+  display: flex;
+  gap: 12px;
   align-items: center;
-  width: fit-content;
-  min-width: 190px;
-  padding: 12px 18px 12px 13px;
+  min-width: 0;
+  min-height: 76px;
+  padding: 12px 14px;
   border: 1px solid rgba(9, 37, 54, 0.1);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.46);
   box-shadow: 0 12px 30px rgba(18, 80, 94, 0.1);
 }
 
-.humidity-card__icon {
+.weather-stat__icon {
   display: grid;
+  flex: 0 0 auto;
   width: 42px;
   height: 42px;
   border-radius: 14px;
@@ -427,28 +438,44 @@ input {
   place-items: center;
 }
 
-.humidity-card__icon svg {
+.weather-stat--feels-like .weather-stat__icon {
+  color: #a95722;
+  background: rgba(255, 174, 94, 0.22);
+}
+
+.weather-stat--wind .weather-stat__icon {
+  color: #496f7c;
+  background: rgba(103, 151, 164, 0.2);
+}
+
+.weather-stat--range .weather-stat__icon {
+  color: #755c16;
+  background: rgba(255, 214, 107, 0.3);
+}
+
+.weather-stat__icon svg {
   width: 23px;
   height: 23px;
 }
 
-.humidity-card small,
-.humidity-card strong {
+.weather-stat small,
+.weather-stat strong {
   display: block;
 }
 
-.humidity-card small {
+.weather-stat small {
   margin-bottom: 2px;
   color: #52717c;
-  font-size: 0.73rem;
+  font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
-.humidity-card strong {
+.weather-stat strong {
   font-family: 'Bricolage Grotesque', sans-serif;
-  font-size: 1.35rem;
+  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  line-height: 1.1;
 }
 
 .current-weather__visual {
@@ -706,6 +733,10 @@ input {
     height: 220px;
   }
 
+  .weather-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .forecast-list {
     grid-auto-columns: minmax(180px, 32%);
     grid-auto-flow: column;
@@ -847,9 +878,15 @@ input {
     display: none;
   }
 
-  .humidity-card {
-    width: 100%;
-    min-height: 66px;
+  .weather-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 26px;
+  }
+
+  .weather-stat {
+    min-height: 72px;
+    padding: 11px 12px;
   }
 
   .section-head {
@@ -889,6 +926,12 @@ input {
 
   .temperature-block span {
     font-size: clamp(4.8rem, 25vw, 5.6rem);
+  }
+
+  .weather-stat {
+    min-height: 110px;
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .forecast h2 {

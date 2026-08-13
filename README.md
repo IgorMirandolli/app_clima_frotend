@@ -13,7 +13,7 @@ App de clima feita com HTML, CSS e JavaScript puro. A interface usa dados reais 
 1. O usuario informa uma cidade.
 2. A Geocoding API encontra a latitude e a longitude.
 3. A Forecast API consulta o clima das coordenadas encontradas.
-4. O JavaScript mostra temperatura, umidade, condicao atual e previsao de 5 dias.
+4. O JavaScript mostra temperatura, sensacao termica, umidade, vento, maxima e minima do dia, condicao atual e previsao de 5 dias.
 
 Ao abrir a pagina, o navegador solicita permissao para usar a localizacao atual. As coordenadas sao usadas somente para consultar o clima e identificar a cidade; elas nao sao armazenadas pela aplicacao. Se a permissao for negada, a busca manual continua disponivel.
 

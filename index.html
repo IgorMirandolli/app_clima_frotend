@@ -75,18 +75,6 @@
             <span id="temperature-value">--</span>
             <small>&deg;C</small>
           </div>
-
-          <article class="humidity-card">
-            <span class="humidity-card__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 3.3S6.8 9 6.8 14a5.2 5.2 0 0 0 10.4 0C17.2 9 12 3.3 12 3.3Z" fill="none" stroke="currentColor" stroke-width="1.8"></path>
-              </svg>
-            </span>
-            <span>
-              <small>Umidade do ar</small>
-              <strong id="humidity-value">--%</strong>
-            </span>
-          </article>
         </div>
 
         <div class="current-weather__visual" aria-hidden="true">
@@ -98,6 +86,57 @@
             </svg>
           </div>
           <span class="visual-caption">Agora</span>
+        </div>
+
+        <div class="weather-stats" aria-label="Detalhes do clima atual">
+          <article class="weather-stat weather-stat--humidity">
+            <span class="weather-stat__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 3.3S6.8 9 6.8 14a5.2 5.2 0 0 0 10.4 0C17.2 9 12 3.3 12 3.3Z" fill="none" stroke="currentColor" stroke-width="1.8"></path>
+              </svg>
+            </span>
+            <span>
+              <small>Umidade</small>
+              <strong id="humidity-value">--%</strong>
+            </span>
+          </article>
+
+          <article class="weather-stat weather-stat--feels-like">
+            <span class="weather-stat__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M14 14.8V5a3 3 0 0 0-6 0v9.8a5 5 0 1 0 6 0Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
+                <path d="M11 8v8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
+              </svg>
+            </span>
+            <span>
+              <small>Sensacao termica</small>
+              <strong id="feels-like-value">--&deg;</strong>
+            </span>
+          </article>
+
+          <article class="weather-stat weather-stat--wind">
+            <span class="weather-stat__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M3 8h11.5a2.5 2.5 0 1 0-2.3-3.5M3 12h16a2 2 0 1 1-1.7 3M3 16h8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
+              </svg>
+            </span>
+            <span>
+              <small>Vento</small>
+              <strong id="wind-value">-- km/h</strong>
+            </span>
+          </article>
+
+          <article class="weather-stat weather-stat--range">
+            <span class="weather-stat__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M8 17V7m0 0L5 10m3-3 3 3M16 7v10m0 0 3-3m-3 3-3-3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+              </svg>
+            </span>
+            <span>
+              <small>Max. / min. hoje</small>
+              <strong id="today-range-value">--&deg; / --&deg;</strong>
+            </span>
+          </article>
         </div>
       </section>
 

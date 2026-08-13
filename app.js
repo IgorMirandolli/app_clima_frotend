@@ -9,6 +9,9 @@ const ui = {
   weatherDescription: document.getElementById('weather-description'),
   temperatureValue: document.getElementById('temperature-value'),
   humidityValue: document.getElementById('humidity-value'),
+  feelsLikeValue: document.getElementById('feels-like-value'),
+  windValue: document.getElementById('wind-value'),
+  todayRangeValue: document.getElementById('today-range-value'),
   currentWeatherIcon: document.getElementById('current-weather-icon'),
   forecastList: document.getElementById('forecast-list'),
   searchStatus: document.getElementById('search-status'),
@@ -246,6 +249,9 @@ function renderWeather(data) {
   ui.weatherDescription.textContent = data.description;
   ui.temperatureValue.textContent = data.temperature;
   ui.humidityValue.textContent = `${data.humidity}%`;
+  ui.feelsLikeValue.textContent = `${data.feelsLike}\u00B0`;
+  ui.windValue.textContent = `${data.windSpeed} km/h`;
+  ui.todayRangeValue.textContent = `${data.todayMax}\u00B0 / ${data.todayMin}\u00B0`;
   ui.currentWeatherIcon.innerHTML = getWeatherIcon(data.weatherCode);
 
   ui.forecastList.innerHTML = data.forecast
@@ -332,7 +338,7 @@ async function findWeather(latitude, longitude, signal) {
   const params = new URLSearchParams({
     latitude: String(latitude),
     longitude: String(longitude),
-    current: 'temperature_2m,relative_humidity_2m,weather_code',
+    current: 'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m',
     daily: 'weather_code,temperature_2m_max,temperature_2m_min',
     timezone: 'auto',
     forecast_days: '5',
@@ -347,6 +353,10 @@ function normalizeWeather(location, weather) {
     description: getWeatherDescription(weather.current.weather_code),
     temperature: Math.round(weather.current.temperature_2m),
     humidity: Math.round(weather.current.relative_humidity_2m),
+    feelsLike: Math.round(weather.current.apparent_temperature),
+    windSpeed: Math.round(weather.current.wind_speed_10m),
+    todayMax: Math.round(weather.daily.temperature_2m_max[0]),
+    todayMin: Math.round(weather.daily.temperature_2m_min[0]),
     weatherCode: weather.current.weather_code,
     forecast: weather.daily.time.map((date, index) => ({
       day: formatWeekday(date),
