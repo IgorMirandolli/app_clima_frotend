@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="App de clima para portifolio construida com HTML, CSS e JavaScript.">
   <title>Clima Agora</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -70,11 +70,11 @@
           <p class="section-label">Clima atual</p>
           <h2 id="location-name">Rio de Janeiro</h2>
           <p id="weather-description" class="weather-description">Carregando dados reais...</p>
+        </div>
 
-          <div class="temperature-block">
-            <span id="temperature-value">--</span>
-            <small>&deg;C</small>
-          </div>
+        <div class="temperature-block">
+          <span id="temperature-value">--</span>
+          <small>&deg;C</small>
         </div>
 
         <div class="current-weather__visual" aria-hidden="true">
@@ -149,12 +149,6 @@
           <p class="section-note"><span></span> Dados atualizados pela Open-Meteo</p>
         </div>
 
-        <p class="forecast-swipe-hint" aria-hidden="true">
-          Deslize para ver os proximos dias
-          <svg viewBox="0 0 24 24">
-            <path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-          </svg>
-        </p>
         <div
           class="forecast-list"
           id="forecast-list"
